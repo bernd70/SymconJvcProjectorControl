@@ -1,0 +1,11 @@
+{
+	"id": "{C468D5B2-1BA8-44B5-AA44-46F990FB1159}",
+	"name": "JvcProjectorControl",
+	"type": 3,
+	"vendor": "JVC",
+	"aliases": ["JVC Projektor"],
+	"parentRequirements": [],
+	"childRequirements": [],
+	"implemented": [],
+	"prefix": "JvcProjectorControl"
+}
