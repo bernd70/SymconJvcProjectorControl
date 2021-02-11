@@ -21,7 +21,7 @@ Derzeit ist folgende Basisfunktionalität implementiert:
 - Lampenmodus einstellen
 - Zugriff auf wesentliche Projektorinformationen
 
-Mehr brauche ich persönlich in der täglichen Nutzung nicht. Ich kann aber bei Bedarf weitere Aktionen implementieren, da das mit verhältnismäßig wenig Aufwand möglich ist. Was der Projektor grundsätzlich zulässt, kann der JVC Doku (siehe Link im (#6-anhang)) entnommen werden.
+Mehr brauche ich persönlich in der täglichen Nutzung nicht. Ich kann aber bei Bedarf weitere Aktionen implementieren, da das mit verhältnismäßig wenig Aufwand möglich ist. Was der Projektor grundsätzlich zulässt, kann der JVC Doku (siehe Link im [Anhang](#6-anhang)) entnommen werden.
 
 ### 2. Voraussetzungen
 
@@ -108,28 +108,40 @@ Wert | Bezeichnung          | Anmerkung
 
 Soweit nicht anders angegeben, liefern die Funktionen keinen Rückgabewert.
 
-`GetProjectorStatus(integer $InstanzID);`
+```php
+JvcProjectorControl_GetProjectorStatus(integer $InstanzID);
+```
 Liest den Status des Projektors mit der InstanzID $InstanzID und setzt alle Symcon Variablen.
 
-`JvcProjectorControl_PowerOn(integer $InstanzID);`
+```php
+JvcProjectorControl_PowerOn(integer $InstanzID);
+```
 Schaltet den Projektor mit der InstanzID $InstanzID ein.
 Der Befehl kann nur ausgeführt werden, wenn der Projektor aus ist (PowerState = "Standby").
 
-`JvcProjectorControl_PowerOff(integer $InstanzID);`
+```php
+JvcProjectorControl_PowerOff(integer $InstanzID);
+```
 Schaltet den Projektor mit der InstanzID $InstanzID aus.
 Der Befehl kann nur ausgeführt werden, wenn der Projektor an ist (PowerState = "PoweredOn").
 
-`JvcProjectorControl_SwitchInput(integer $InstanzID, integer $input);`
+```php
+JvcProjectorControl_SwitchInput(integer $InstanzID, integer $input);
+```
 Schaltet den Projektor mit der InstanzID $InstanzID auf einen bestimmten Eingang.
 Der Befehl kann nur ausgeführt werden, wenn der Projektor an ist (PowerState = "PoweredOn").
 
-`JvcProjectorControl_SetLampPower(integer $InstanzID, bool $high);`
+```php
+JvcProjectorControl_SetLampPower(integer $InstanzID, bool $high);
+```
 Schaltet den Lampenmodus des Projektors mit der InstanzID $InstanzID auf Normal ($high = False) oder Hoch ($high = True)
 Der Befehl kann nur ausgeführt werden, wenn der Projektor an ist (PowerState = "PoweredOn").
 
 ### 6. Anhang
 
-[JVC D-ILA® Projector Remote Control Guide](http://support.jvc.com/consumer/support/documents/DILAremoteControlGuide.pdf)
+__Quellen__
+
+- [JVC D-ILA® Projector Remote Control Guide](http://support.jvc.com/consumer/support/documents/DILAremoteControlGuide.pdf)
 
 ### 7. ToDo
 

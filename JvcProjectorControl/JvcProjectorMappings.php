@@ -73,8 +73,8 @@ class JvcProjectorMappings
         var $mapHDRMode = array(
             "0" => "SDR",
             "1" => "HDR",
-            "2" => "SMPTE ST 2084",
-            "F" => "DNone");        
+            "2" => "SMPTEST 2084",
+            "F" => "None");        
 
         var $mapColorSpace = array(
             "0" => "No Data",
@@ -85,8 +85,8 @@ class JvcProjectorMappings
             "5" => "sYCC601",
             "6" => "Adobe YCC601",
             "7" => "Adobe RGB",
-            "8" => "BT.2020",
-            "9" => "BT.2020 NCL",
+            "8" => "BT.2020", // Constant luminance
+            "9" => "BT.2020", // Non constant luminance
             "A" => "Reserved (Other)");                    
 
         function GetProjectorModel(string $key, $default)

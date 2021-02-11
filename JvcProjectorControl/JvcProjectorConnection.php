@@ -58,14 +58,29 @@ class JvcProjectorConnection
 
         socket_set_option($this->socket, SOL_SOCKET, SO_RCVTIMEO, array("sec" => 5, "usec" => 0));
 
-        $result = socket_connect($this->socket, $this->host, $this->port);
-        if ($result === false)
+        $retries = 3;
+
+        while (true)
         {
-            $error = "socket_connect() fehlgeschlagen: ($result) " . socket_strerror(socket_last_error($this->socket));
-            
+            $result = socket_connect($this->socket, $this->host, $this->port);
+            if ($result !== false)
+                break;
+
+            $socketError = socket_last_error($this->socket);
+            if  ($socketError == 111) // ECONNREFUSED
+            {
+                IPS_Sleep(1000);
+
+                $retries--;
+
+                if ($retries > 0)
+                    continue;
+            }
+            $error = "socket_connect() fehlgeschlagen: ($socketError) " . socket_strerror($socketError);
+        
             socket_close($this->socket);
             unset($this->socket);
-            
+        
             throw new Exception($error);
         }
 
@@ -257,7 +272,7 @@ class JvcProjectorConnection
 
     public function GetColorSpace() : string
     {
-        $colorSapce = $this->ExecuteAdvancedRequest("IFXV");
+        $colorSapce = $this->ExecuteAdvancedRequest("IFCM");
         
         return $this->mappings->GetColorSpace($colorSapce, self::STRING_Unknown);
     }
