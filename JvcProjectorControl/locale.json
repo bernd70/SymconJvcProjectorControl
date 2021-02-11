@@ -1,0 +1,35 @@
+{
+    "translations": {
+        "de": {
+            "Hostname or IP address": "Hostname oder IP Adresse",
+            "Polling Interval": "Abfrageintervall",
+            "seconds": "Sekunden",
+            "Activate exteded logging": "Erweitertes Logging aktivieren",
+            "Power On": "Projektor einschalten",
+            "Power Off": "Projektor ausschalten",
+            "Projector unreadable": "Projektor nicht erreichbar",
+            "Communication failure": "Kommunikation mit Projektor nicht möglich",
+            "Power status": "Power Status",
+            "Current input": "Aktueller Eingang",
+            "Source status": "Status Quelle",
+            "Signal": "Signal",
+            "Color space": "Farbraum",
+            "Color model":"Farbmodell",
+            "HDR mode": "HDR Modus",
+            "Lamp hours": "Lampenstunden",
+            "Model": "Modell",
+            "Firmware": "Firmware",
+            "MAC address": "MAC Addresse",
+            "Switching": "Umschalten",
+            "Unknown": "Unbekannt",
+            "JVC logo": "JVC Logo",
+            "No valid signal": "Kein gültiges Signal",
+            "Okay": "Okay",
+            "Standby": "Standby",
+            "Starting": "Hochfahren",
+            "Powered On": "Eingeschaltet",
+            "Cooling down": "Abkühlen",
+            "Emergency": "Notfall"
+        }
+    }
+}

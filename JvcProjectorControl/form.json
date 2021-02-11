@@ -4,7 +4,7 @@
         {
             "name": "Host",
             "type": "ValidationTextBox",
-            "caption": "IP Addresse"
+            "caption": "Hostname or IP address"
         },
         {
             "name": "Port",
@@ -14,28 +14,24 @@
         {
             "name": "UpdateInterval",
             "type": "NumberSpinner",
-            "caption": "Abfrageintervall",
-            "suffix": "Sekunden"
+            "caption": "Polling interval",
+            "suffix": "seconds"
         },
         {
-            "name": "LogLevel",
-            "type": "Select",
-            "caption": "Log Level",
-            "options": 
-            [
-                { "label": "Standard", "value": 2 },
-                { "label": "Debug", "value": 9 }
-            ]
+            "type": "CheckBox",
+            "name": "ExtendedLogging",
+            "caption": "Activate exteded logging",
+            "value": false
         }        
     ],
     "actions":
     [
-        { "type": "Button", "label": "Einschalten", "onClick": "JvcProjectorControl_PowerOn($id);" },
-        { "type": "Button", "label": "Auschalten", "onClick": "JvcProjectorControl_PowerOff($id);" }
+        { "type": "Button", "label": "Power On", "onClick": "JvcProjectorControl_PowerOn($id);" },
+        { "type": "Button", "label": "Power Off", "onClick": "JvcProjectorControl_PowerOff($id);" }
     ],
     "status":
     [
-        { "code": 201, "icon": "error", "caption": "Projektor nicht erreichbar" },
-        { "code": 202, "icon": "error", "caption": "Kommunikation mit Projektor nicht möglich" }
+        { "code": 201, "icon": "error", "caption": "Projector unreadable" },
+        { "code": 202, "icon": "error", "caption": "Communication failure" }
     ]
   }

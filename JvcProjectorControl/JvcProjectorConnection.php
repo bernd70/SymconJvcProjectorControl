@@ -8,12 +8,12 @@ class JvcProjectorConnection
 {
     const STRING_Unknown = "Unbekannt";
 
-    const POWERSTATE_Unknown = 0;
-    const POWERSTATE_Standby = 1;
-    const POWERSTATE_Starting = 2;
-    const POWERSTATE_PoweredOn = 3;
-    const POWERSTATE_Cooldown = 4;
-    const POWERSTATE_Emergency = 5;
+    const POWERSTATUS_Unknown = 0;
+    const POWERSTATUS_Standby = 1;
+    const POWERSTATUS_Starting = 2;
+    const POWERSTATUS_PoweredOn = 3;
+    const POWERSTATUS_Cooldown = 4;
+    const POWERSTATUS_Emergency = 5;
 
     const INPUT_Unknown = 0;
     const INPUT_HDMI1 = 1;
@@ -131,18 +131,18 @@ class JvcProjectorConnection
         }
     }
 
-    public function GetPowerState() : int
+    public function GetPowerStatus() : int
     {
-        $powerState = $this->ExecuteAdvancedRequest("PW");
+        $powerStatus = $this->ExecuteAdvancedRequest("PW");
 
-        switch ($powerState)
+        switch ($powerStatus)
         {
-            case "0": return self::POWERSTATE_Standby;
-            case "1": return self::POWERSTATE_PoweredOn;
-            case "2": return self::POWERSTATE_Cooldown;
-            case "3": return self::POWERSTATE_Starting; // Undocumented
-            case "4": return self::POWERSTATE_Emergency;
-            default: return self::POWERSTATE_Unknown;
+            case "0": return self::POWERSTATUS_Standby;
+            case "1": return self::POWERSTATUS_PoweredOn;
+            case "2": return self::POWERSTATUS_Cooldown;
+            case "3": return self::POWERSTATUS_Starting; // Undocumented
+            case "4": return self::POWERSTATUS_Emergency;
+            default: return self::POWERSTATUS_Unknown;
         }
     }
 
@@ -410,17 +410,17 @@ class JvcProjectorConnection
         return implode(" ", $hexCodes);
     }
 
-    public function TranslatePowerState(int $powerState) : string
+    public function TranslatePowerStatus(int $powerStatus) : string
     {
-        switch ($powerState)
+        switch ($powerStatus)
         {
-            case self::POWERSTATE_Standby: return "Standby";
-            case self::POWERSTATE_Starting: return "Starting";
-            case self::POWERSTATE_PoweredOn: return "Powered On";
-            case self::POWERSTATE_Cooldown: return "Cooldown";
-            case self::POWERSTATE_Emergency: return "Emergency";
-            case self::POWERSTATE_Unknown: return self::STRING_Unknown;
-            default: return "INVALID [" . $powerState . "]";
+            case self::POWERSTATUS_Standby: return "Standby";
+            case self::POWERSTATUS_Starting: return "Starting";
+            case self::POWERSTATUS_PoweredOn: return "Powered On";
+            case self::POWERSTATUS_Cooldown: return "Cooldown";
+            case self::POWERSTATUS_Emergency: return "Emergency";
+            case self::POWERSTATUS_Unknown: return self::STRING_Unknown;
+            default: return "INVALID [" . $powerStatus . "]";
         }
     }
 

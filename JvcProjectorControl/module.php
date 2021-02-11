@@ -2,27 +2,23 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../libs/BaseIPSModule.php';
+
 include "SingleJvcProjectorConnection.php";
 
-class JvcProjectorControl extends IPSModule
+class JvcProjectorControl extends BaseIPSModule
 {
     var $moduleName = "JvcProjectorControl";
 
-	const LOGLEVEL_INFO = 0;
-	const LOGLEVEL_WARNING = 1;
-	const LOGLEVEL_ERROR = 2;
-    const LOGLEVEL_DEBUG = 9;
-        
     const PROPERTY_HOST = "Host";
     const PROPERTY_PORT = "Port";
     const PROPERTY_UPDATEINTERVAL = "UpdateInterval";
-    const PROPERTY_LOGLEVEL = "LogLevel";
 
     const VARIABLE_Model = "Model";
     const VARIABLE_Power = "Power";
-    const VARIABLE_PowerState = "PowerState";
+    const VARIABLE_PowerStatus = "PowerStatus";
     const VARIABLE_Input = "Input";
-    const VARIABLE_SourceStatus = "SourceState";
+    const VARIABLE_SourceStatus = "SourceStatus";
     const VARIABLE_LampHours = "LampHours";
     const VARIABLE_Signal = "Signal";
     const VARIABLE_Version = "Version";
@@ -31,7 +27,7 @@ class JvcProjectorControl extends IPSModule
     const VARIABLE_ColorSpace = "ColorSpace";
     const VARIABLE_HDRMode = "HDRMode";
 
-    const STRING_Unknown = "Unbekannt";
+    const INPUT_Switching = 99;
 
     var $projectorModel;
 
@@ -54,7 +50,7 @@ class JvcProjectorControl extends IPSModule
 
         // Invalidate all variables so they will be updated by the first GetProjectorStatus() call
         SetValueString($this->GetIDForIdent(self::VARIABLE_Model), "");
-        SetValueInteger($this->GetIDForIdent(self::VARIABLE_PowerState), JvcProjectorConnection::POWERSTATE_Unknown);
+        SetValueInteger($this->GetIDForIdent(self::VARIABLE_PowerStatus), JvcProjectorConnection::POWERSTATUS_Unknown);
         SetValueInteger($this->GetIDForIdent(self::VARIABLE_Input), JvcProjectorConnection::INPUT_Unknown);
         SetValueInteger($this->GetIDForIdent(self::VARIABLE_SourceStatus), JvcProjectorConnection::SOURCESTATUS_Unknown);
 
@@ -86,34 +82,34 @@ class JvcProjectorControl extends IPSModule
         $this->RegisterPropertyString(self::PROPERTY_HOST, "");
         $this->RegisterPropertyInteger(self::PROPERTY_PORT, 20554);
         $this->RegisterPropertyInteger(self::PROPERTY_UPDATEINTERVAL, 10);
-        $this->RegisterPropertyInteger(self::PROPERTY_LOGLEVEL, self::LOGLEVEL_DEBUG);
     }
 
     private function RegisterVariableProfiles()
     {
-        if (!IPS_VariableProfileExists("JvcProjectorControl.PowerState"))
+        if (!IPS_VariableProfileExists("JvcProjectorControl.PowerStatus"))
         {
-            IPS_CreateVariableProfile("JvcProjectorControl.PowerState", 1);
+            IPS_CreateVariableProfile("JvcProjectorControl.PowerStatus", 1);
 
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerState", JvcProjectorConnection::POWERSTATE_Unknown, self::STRING_Unknown, "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerState", JvcProjectorConnection::POWERSTATE_Standby, "Standby", "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerState", JvcProjectorConnection::POWERSTATE_Starting, "Hochfahren", "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerState", JvcProjectorConnection::POWERSTATE_PoweredOn, "Eingeschaltet", "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerState", JvcProjectorConnection::POWERSTATE_Cooldown, "Abkühlen", "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerState", JvcProjectorConnection::POWERSTATE_Emergency, "Notfall", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_Unknown, $this->Translate("Unknown"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_Standby, $this->Translate("Standby"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_Starting, $this->Translate("Starting"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_PoweredOn, $this->Translate("Powered On"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_Cooldown, $this->Translate("Cooling down"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_Emergency, $this->Translate("Emergency"), "", -1);
         }        
 
         if (!IPS_VariableProfileExists("JvcProjectorControl.Input"))
         {
             IPS_CreateVariableProfile("JvcProjectorControl.Input", 1);
 
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_Unknown, self::STRING_Unknown, "", 0);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_HDMI1, "HDMI #1", "", 0);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_HDMI2, "HDMI #2", "", 0);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_Component, "Component", "", 0);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_PC, "PC", "", 0);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_Video, "Video", "", 0);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_SVideo, "S-Video", "", 0);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_Unknown, $this->Translate("Unknown"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_HDMI1, "HDMI #1", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_HDMI2, "HDMI #2", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_Component, "Component", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_PC, "PC", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_Video, "Video", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_SVideo, "S-Video", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", self::INPUT_Switching, $this->Translate("Switching"), "", -1);
         }     
         
 
@@ -121,10 +117,10 @@ class JvcProjectorControl extends IPSModule
         {
             IPS_CreateVariableProfile("JvcProjectorControl.SourceStatus", 1);
 
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_Unknown, self::STRING_Unknown, "", 0);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_JVCLogo, "JVC Logo", "", 0);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_NoValidSignal, "Kein gültiges Signal", "", 0);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_Okay, "Okay", "", 0);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_Unknown, $this->Translate("Unknown"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_JVCLogo, $this->Translate("JVC Logo"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_NoValidSignal, $this->Translate("No valid signal"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_Okay, $this->Translate("Okay"), "", -1);
         }         
 
 
@@ -140,19 +136,19 @@ class JvcProjectorControl extends IPSModule
     private function RegisterVariables()
     {
         $this->RegisterVariableBoolean(self::VARIABLE_Power, "Power", "~Switch", 1);
-        $this->RegisterVariableInteger(self::VARIABLE_PowerState, "Power Status", "JvcProjectorControl.PowerState", 2);
-        $this->RegisterVariableInteger(self::VARIABLE_Input, "Aktueller Eingang", "JvcProjectorControl.Input", 3);
-        $this->RegisterVariableInteger(self::VARIABLE_SourceStatus, "Status Quelle", "JvcProjectorControl.SourceStatus", 4);
-        $this->RegisterVariableString(self::VARIABLE_Signal, "Signal", "", 5);
-        $this->RegisterVariableString(self::VARIABLE_ColorSpace, "Farbraum", "", 6);
-        $this->RegisterVariableString(self::VARIABLE_ColorModel, "Farbmodell", "", 7);
-        $this->RegisterVariableString(self::VARIABLE_HDRMode, "HDR Modus", "", 8);
+        $this->RegisterVariableInteger(self::VARIABLE_PowerStatus, $this->Translate("Power Status"), "JvcProjectorControl.PowerStatus", 2);
+        $this->RegisterVariableInteger(self::VARIABLE_Input, $this->Translate("Current input"), "JvcProjectorControl.Input", 3);
+        $this->RegisterVariableInteger(self::VARIABLE_SourceStatus, $this->Translate("Source Status"), "JvcProjectorControl.SourceStatus", 4);
+        $this->RegisterVariableString(self::VARIABLE_Signal, $this->Translate("Signal"), "", 5);
+        $this->RegisterVariableString(self::VARIABLE_ColorSpace, $this->Translate("Color space"), "", 6);
+        $this->RegisterVariableString(self::VARIABLE_ColorModel, $this->Translate("Color model"), "", 7);
+        $this->RegisterVariableString(self::VARIABLE_HDRMode, $this->Translate("HDR mode"), "", 8);
 
-        $this->RegisterVariableInteger(self::VARIABLE_LampHours, "Lampenstunden", "JvcProjectorControl.Duration.Hours", 10);
+        $this->RegisterVariableInteger(self::VARIABLE_LampHours, $this->Translate("Lamp hours"), "JvcProjectorControl.Duration.Hours", 10);
 
-        $this->RegisterVariableString(self::VARIABLE_Model, "Modell", "", 20);
-        $this->RegisterVariableString(self::VARIABLE_Version, "Firmware", "", 21);
-        $this->RegisterVariableString(self::VARIABLE_MACAddress, "MAC Addresse", "", 22);
+        $this->RegisterVariableString(self::VARIABLE_Model, $this->Translate("Model"), "", 20);
+        $this->RegisterVariableString(self::VARIABLE_Version, $this->Translate("Firmware"), "", 21);
+        $this->RegisterVariableString(self::VARIABLE_MACAddress, $this->Translate("MAC address"), "", 22);
 
         $this->EnableAction(self::VARIABLE_Power);
         $this->EnableAction(self::VARIABLE_Input);
@@ -167,7 +163,7 @@ class JvcProjectorControl extends IPSModule
 
         $port = $this->ReadPropertyInteger(self::PROPERTY_PORT);
 
-        $this->Log("Verbindungsaufbau zu Projektor " . $host . " auf Port " . $port, self::LOGLEVEL_DEBUG);
+        $this->LogDebug("Verbindungsaufbau zu Projektor " . $host . " auf Port " . $port);
 
         $jvcProjectorConnection =  new SingleJvcProjectorConnection($host, $port);
 
@@ -178,7 +174,7 @@ class JvcProjectorControl extends IPSModule
 
     public function RequestAction($ident, $value)
     {
-        $this->Log("RequestAction(" . $ident . ", " . $value . ") aufgerufen", self::LOGLEVEL_DEBUG);
+        $this->LogDebug("RequestAction(" . $ident . ", " . $value . ") aufgerufen");
 
         switch ($ident)
         {
@@ -207,7 +203,7 @@ class JvcProjectorControl extends IPSModule
         }
         catch (Exception $e) 
         {
-            $this->Log("Fehler beim Ausführen von GetProjectorStatus Kommando: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+            $this->LogError("Fehler beim Ausführen von GetProjectorStatus Kommando: " . $e->getMessage());
             return false;
         }
     }
@@ -218,21 +214,21 @@ class JvcProjectorControl extends IPSModule
         {
             $jvcProjectorConnection = $this->Connect();
 
-            $powerState = $jvcProjectorConnection->GetPowerState();
-            if ($powerState == JvcProjectorConnection::POWERSTATE_Standby)
+            $powerStatus = $jvcProjectorConnection->GetPowerStatus();
+            if ($powerStatus == JvcProjectorConnection::POWERSTATUS_Standby)
             {
-                $this->Log("Schalte Gerät ein", self::LOGLEVEL_INFO);
+                $this->Log("Schalte Gerät ein");
 
                 $jvcProjectorConnection->PowerOn();
-                $jvcProjectorConnection->GetPowerState();
+                $jvcProjectorConnection->GetPowerStatus();
             }
-            else if ($powerState == JvcProjectorConnection::POWERSTATE_PoweredOn)
-                $this->Log("PowerOn Kommando ignoriert, Gerät ist bereits eingeschaltet", self::LOGLEVEL_WARNING);
-            else if ($powerState == JvcProjectorConnection::POWERSTATE_Starting)
-                $this->Log("PowerOn Kommando ignoriert, Gerät startet bereits", self::LOGLEVEL_WARNING);
+            else if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
+                $this->LogWarning("PowerOn Kommando ignoriert, Gerät ist bereits eingeschaltet");
+            else if ($powerStatus == JvcProjectorConnection::POWERSTATUS_Starting)
+                $this->LogWarning("PowerOn Kommando ignoriert, Gerät startet bereits");
             else
             {
-                $this->Log("PowerOn Kommando bei Status [" . $jvcProjectorConnection->TranslatePowerState($powerState) . "] ungültig", self::LOGLEVEL_ERROR);
+                $this->LogError("PowerOn Kommando bei Status [" . $jvcProjectorConnection->TranslatePowerStatus($powerStatus) . "] ungültig");
                 return false;
             }
 
@@ -240,7 +236,7 @@ class JvcProjectorControl extends IPSModule
         }
         catch (Exception $e) 
         {
-            $this->Log("Fehler beim Ausführen von PowerOn Kommando: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+            $this->LogError("Fehler beim Ausführen von PowerOn Kommando: " . $e->getMessage());
             return false;
         }
     }
@@ -251,20 +247,20 @@ class JvcProjectorControl extends IPSModule
         {
             $jvcProjectorConnection = $this->Connect();
 
-            $powerState = $jvcProjectorConnection->GetPowerState();
-            if ($powerState == JvcProjectorConnection::POWERSTATE_PoweredOn)
+            $powerStatus = $jvcProjectorConnection->GetPowerStatus();
+            if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
             {
-                $this->Log("Schalte Gerät aus", self::LOGLEVEL_INFO);
+                $this->Log("Schalte Gerät aus");
                 $jvcProjectorConnection->PowerOff();
-                $jvcProjectorConnection->GetPowerState();
+                $jvcProjectorConnection->GetPowerStatus();
             }
-            else if ($powerState == JvcProjectorConnection::POWERSTATE_Standby)
-                $this->Log("PowerOff Kommando ignoriert, Gerät ist bereits ausgeschaltet", self::LOGLEVEL_WARNING);
-            else if ($powerState == JvcProjectorConnection::POWERSTATE_Cooldown)
-                $this->Log("PowerOff Kommando ignoriert, Gerät fährt bereits herunter", self::LOGLEVEL_WARNING);
+            else if ($powerStatus == JvcProjectorConnection::POWERSTATUS_Standby)
+                $this->LogWarning("PowerOff Kommando ignoriert, Gerät ist bereits ausgeschaltet");
+            else if ($powerStatus == JvcProjectorConnection::POWERSTATUS_Cooldown)
+                $this->LogWarning("PowerOff Kommando ignoriert, Gerät fährt bereits herunter");
             else
             {
-                $this->Log("PowerOff Kommando bei Status [" . $jvcProjectorConnection->TranslatePowerState($powerState) . "] ungültig", self::LOGLEVEL_ERROR);            
+                $this->LogError("PowerOff Kommando bei Status [" . $jvcProjectorConnection->TranslatePowerStatus($powerStatus) . "] ungültig");
                 return false;
             }
 
@@ -272,13 +268,19 @@ class JvcProjectorControl extends IPSModule
         }
         catch (Exception $e) 
         {
-            $this->Log("Fehler beim Ausführen von PowerOff Kommando: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+            $this->LogError("Fehler beim Ausführen von PowerOff Kommando: " . $e->getMessage());
             return false;
         }
     }
 
     public function SwitchInput(int $input)
     {
+        if ($input == self::INPUT_Switching)
+        {
+            $this->LogError("Ungültiger Eingang ausgewählt");
+            return;
+        }
+        
         try
         {
             $jvcProjectorConnection = $this->Connect();
@@ -289,20 +291,22 @@ class JvcProjectorControl extends IPSModule
             $currentInput = $jvcProjectorConnection->GetCurrentInput();
             if ($currentInput != $input)
             {
-                $this->Log("Schalte Eingang um auf [" . $jvcProjectorConnection-> TranslateInput($input) . "]", self::LOGLEVEL_INFO);
+                $this->Log("Schalte Eingang um auf [" . $jvcProjectorConnection-> TranslateInput($input) . "]");
+                
+                SetValueInteger($this->GetIDForIdent(self::VARIABLE_Input), self::INPUT_Switching);
 
                 $jvcProjectorConnection->SwitchInput($input);  
 
                 $this->UpdateVariables($jvcProjectorConnection);
             }
             else
-                $this->Log("SwitchInput Kommando ignoriert, aktueller Eingang ist bereits [" . $jvcProjectorConnection->TranslateInput($input) . "]", self::LOGLEVEL_WARNING);
+                $this->LogWarning("SwitchInput Kommando ignoriert, aktueller Eingang ist bereits [" . $jvcProjectorConnection->TranslateInput($input) . "]");
 
             return true;
         }
         catch (Exception $e) 
         {
-            $this->Log("Fehler beim Ausführen von SwitchInput Kommando: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+            $this->LogError("Fehler beim Ausführen von SwitchInput Kommando: " . $e->getMessage());
             return false;
         }        
     }
@@ -322,7 +326,7 @@ class JvcProjectorControl extends IPSModule
         }
         catch (Exception $e) 
         {
-            $this->Log("Fehler beim Ausführen von SetLampPower Kommando: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+            $this->LogError("Fehler beim Ausführen von SetLampPower Kommando: " . $e->getMessage());
             return false;
         }        
     }    
@@ -331,17 +335,17 @@ class JvcProjectorControl extends IPSModule
     {
         try
         {
-            $powerState = $jvcProjectorConnection->GetPowerState();
+            $powerStatus = $jvcProjectorConnection->GetPowerStatus();
 
-            if ($powerState == JvcProjectorConnection::POWERSTATE_PoweredOn)
+            if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
                 return true;
 
-            $this->Log("Funktion " . $function . " kann nur ausgeführt werden, wenn das Gerät eingeschaltet ist.", self::LOGLEVEL_ERROR);
+            $this->LogError("Funktion " . $function . " kann nur ausgeführt werden, wenn das Gerät eingeschaltet ist.");
             return false;
         }
         catch (Exception $e) 
         {
-            throw new Exception("Fehler beim Ausführen von GetPowerState Kommando: " . $e->getMessage());
+            throw new Exception("Fehler beim Ausführen von GetPowerStatus Kommando: " . $e->getMessage());
         }            
     }
 
@@ -352,104 +356,103 @@ class JvcProjectorControl extends IPSModule
         {
             try
             {
-                $this->Log("Get Projector Model", self::LOGLEVEL_DEBUG);
+                $this->LogDebug("Get Projector Model");
 
                 $this->projectorModel = $jvcProjectorConnection->GetModel();
                 $this->UpdateStringValueIfChanged(self::VARIABLE_Model, $this->projectorModel);
             }
             catch (Exception $e)
             {
-                $this->Log("Fehler beim Ermitteln von Model: " . $e->getMessage(), self::LOGLEVEL_ERROR);
-                $this->UpdateStringValueIfChanged(self::VARIABLE_Model, self::STRING_Unknown);
+                $this->LogError("Fehler beim Ermitteln von Model: " . $e->getMessage());
+                $this->UpdateStringValueIfChanged(self::VARIABLE_Model, $this->Translate("Unknown"));
             }
 
             try
             {
-                $this->Log("Get MAC address", self::LOGLEVEL_DEBUG);
+                $this->LogDebug("Get MAC address");
 
                 $this->UpdateStringValueIfChanged(self::VARIABLE_MACAddress, $jvcProjectorConnection->GetMACAddress());
             }
             catch (Exception $e)
             {
-                $this->Log("Fehler beim Ermitteln von MAC Adresse: " . $e->getMessage(), self::LOGLEVEL_ERROR);
-                $this->UpdateStringValueIfChanged(self::VARIABLE_MACAddress, self::STRING_Unknown);
+                $this->LogError("Fehler beim Ermitteln von MAC Adresse: " . $e->getMessage());
+                $this->UpdateStringValueIfChanged(self::VARIABLE_MACAddress, $this->Translate("Unknown"));
             }
         }
 
         try
         {
-            $this->Log("Update Power State", self::LOGLEVEL_DEBUG);
+            $this->LogDebug("Update Power Status");
 
-            $powerState = $jvcProjectorConnection->GetPowerState();
-            if ($this->UpdateIntegerValueIfChanged(self::VARIABLE_PowerState, $powerState))
-                SetValueBoolean($this->GetIDForIdent(self::VARIABLE_Power), $powerState == JvcProjectorConnection::POWERSTATE_PoweredOn);
+            $powerStatus = $jvcProjectorConnection->GetPowerStatus();
+            if ($this->UpdateIntegerValueIfChanged(self::VARIABLE_PowerStatus, $powerStatus))
+                SetValueBoolean($this->GetIDForIdent(self::VARIABLE_Power), $powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn);
         }
         catch (Exception $e)
         {
-            $this->Log("Fehler beim Ermitteln von PowerState: " . $e->getMessage(), self::LOGLEVEL_ERROR);
-            $this->UpdateIntegerValueIfChanged(self::VARIABLE_PowerState, JvcProjectorConnection::POWERSTATE_Unknown);
+            $this->LogError("Fehler beim Ermitteln von PowerStatus: " . $e->getMessage());
+            $this->UpdateIntegerValueIfChanged(self::VARIABLE_PowerStatus, JvcProjectorConnection::POWERSTATUS_Unknown);
         }
 
         $currentInput = JvcProjectorConnection::INPUT_Unknown;
         $sourceStatus = JvcProjectorConnection::SOURCESTATUS_Unknown;
-        $signal = self::STRING_Unknown;
-        $softwareVersion = self::STRING_Unknown;
+        $signal = $softwareVersion = $this->Translate("Unknown");
 
-        if ($powerState == JvcProjectorConnection::POWERSTATE_PoweredOn)
+        if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
         {
             try
             {
-                $this->Log("Update Current Input", self::LOGLEVEL_DEBUG);
+                $this->LogDebug("Update Current Input");
 
                 $currentInput = $jvcProjectorConnection->GetCurrentInput();
             }
             catch (Exception $e)
             {
-                $this->Log("Fehler beim Ermitteln von Current Input: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+                $this->LogError("Fehler beim Ermitteln von Current Input: " . $e->getMessage());
             }
     
             try
             {
-                $this->Log("Update Source Status", self::LOGLEVEL_DEBUG);
+                $this->LogDebug("Update Source Status");
 
                 $sourceStatus = $jvcProjectorConnection->GetSourceStatus();
             }
             catch (Exception $e)
             {
-                $this->Log("Fehler beim Ermitteln von Source Status: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+                $this->LogError("Fehler beim Ermitteln von Source Status: " . $e->getMessage());
             }
     
             try
             {
-                $this->Log("Update Signal", self::LOGLEVEL_DEBUG);
+                $this->LogDebug("Update Signal");
                 
                 $signal = $jvcProjectorConnection->GetSignal();
             }
             catch (Exception $e)
             {
-                $this->Log("Fehler beim Ermitteln von Signal: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+                $this->LogError("Fehler beim Ermitteln von Signal: " . $e->getMessage());
             }
 
             try
             {
-                $this->Log("Update Lamp Hours", self::LOGLEVEL_DEBUG);
+                $this->LogDebug("Update Lamp Hours");
 
                 $this->UpdateIntegerValueIfChanged(self::VARIABLE_LampHours, $jvcProjectorConnection->GetLampHours());
             }
             catch (Exception $e)
             {
-                $this->Log("Fehler beim Ermitteln von Lamp Hours: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+                $this->LogError("Fehler beim Ermitteln von Lamp Hours: " . $e->getMessage());
             }
     
             try
             {
-                $this->Log("Update Software Version", self::LOGLEVEL_DEBUG);
+                $this->LogDebug("Update Software Version");
             
                 $softwareVersion = $jvcProjectorConnection->GetVersion();
             }
             catch (Exception $e)
             {
-                $this->Log("Fehler beim Ermitteln von Software Version: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+                $this->LogError("Fehler beim Ermitteln von Software Version: " . $e->getMessage());
             }
         }
 
@@ -458,43 +461,41 @@ class JvcProjectorControl extends IPSModule
         $this->UpdateStringValueIfChanged(self::VARIABLE_Signal, $signal);
         $this->UpdateStringValueIfChanged(self::VARIABLE_Version, $softwareVersion);
 
-        $colorSpace = self::STRING_Unknown;
-        $colorModel = self::STRING_Unknown;
-        $hdrMode = self::STRING_Unknown;
+        $colorSpace = $colorModel = $hdrMode = $this->Translate("Unknown");
 
         if ($sourceStatus == JvcProjectorConnection::SOURCESTATUS_Okay)
         {
             try
             {
-                $this->Log("Update Color Space", self::LOGLEVEL_DEBUG);
+                $this->LogDebug("Update Color Space");
 
                 $colorSpace = $jvcProjectorConnection->GetColorSpace();
             }
             catch (Exception $e)
             {
-                $this->Log("Fehler beim Ermitteln von Color Space: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+                $this->LogError("Fehler beim Ermitteln von Color Space: " . $e->getMessage());
             }            
 
             try
             {
-                $this->Log("Update Color Model", self::LOGLEVEL_DEBUG);
+                $this->LogDebug("Update Color Model");
 
                 $colorModel = $jvcProjectorConnection->GetColorModel();
             }
             catch (Exception $e)
             {
-                $this->Log("Fehler beim Ermitteln von Color Model: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+                $this->LogError("Fehler beim Ermitteln von Color Model: " . $e->getMessage());
             }  
             
             try
             {
-                $this->Log("Update HDR Mode", self::LOGLEVEL_DEBUG);
+                $this->LogDebug("Update HDR Mode");
 
                 $hdrMode = $jvcProjectorConnection->GetHDRMode();
             }
             catch (Exception $e)
             {
-                $this->Log("Fehler beim Ermitteln von HDR Mode: " . $e->getMessage(), self::LOGLEVEL_ERROR);
+                $this->LogError("Fehler beim Ermitteln von HDR Mode: " . $e->getMessage());
             }
         }
 
@@ -514,7 +515,7 @@ class JvcProjectorControl extends IPSModule
 
         if ($oldValue != $newValue)
         {
-            $this->Log("Setze " . $varIdent . " von " . $oldValue . " auf " . $newValue, self::LOGLEVEL_DEBUG);
+            $this->LogDebug("Setze " . $varIdent . " von " . $oldValue . " auf " . $newValue);
 
             SetValueInteger($this->GetIDForIdent($varIdent), $newValue);
             return true;
@@ -532,32 +533,13 @@ class JvcProjectorControl extends IPSModule
 
         if ($oldValue != $newValue)
         {
-            $this->Log("Setze " . $varIdent . " von " . $oldValue . " auf " . $newValue, self::LOGLEVEL_DEBUG);
+            $this->LogDebug("Setze " . $varIdent . " von " . $oldValue . " auf " . $newValue);
 
             SetValueString($this->GetIDForIdent($varIdent), $newValue);
             return true;
         }
 
         return false;
-    }    
-
-    private function Log(string $logMessage, int $logLevel)
-    {
-        if ($this->ReadPropertyInteger(self::PROPERTY_LOGLEVEL) < $logLevel)
-            return;
-    
-        switch($logLevel)
-        {
-            case self::LOGLEVEL_INFO:
-            case self::LOGLEVEL_WARNING:
-            case self::LOGLEVEL_ERROR:
-                IPS_LogMessage($this->moduleName, $logMessage);
-                break;
-    
-            case self::LOGLEVEL_DEBUG:
-                IPS_LogMessage($this->moduleName, "[DBG] " . $logMessage);
-                break;
-        }
     }
 }
 
