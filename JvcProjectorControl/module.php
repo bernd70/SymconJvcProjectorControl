@@ -397,10 +397,10 @@ class JvcProjectorControl extends BaseIPSModule
 
         if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
         {
+            $this->LogDebug("Update variables for powered on projector");
+
             try
             {
-                $this->LogDebug("Update Current Input");
-
                 $currentInput = $jvcProjectorConnection->GetCurrentInput();
             }
             catch (Exception $e)
@@ -410,8 +410,6 @@ class JvcProjectorControl extends BaseIPSModule
     
             try
             {
-                $this->LogDebug("Update Source Status");
-
                 $sourceStatus = $jvcProjectorConnection->GetSourceStatus();
             }
             catch (Exception $e)
@@ -421,8 +419,6 @@ class JvcProjectorControl extends BaseIPSModule
     
             try
             {
-                $this->LogDebug("Update Signal");
-                
                 $signal = $jvcProjectorConnection->GetSignal();
             }
             catch (Exception $e)
@@ -432,8 +428,6 @@ class JvcProjectorControl extends BaseIPSModule
 
             try
             {
-                $this->LogDebug("Update Lamp Hours");
-
                 $this->UpdateIntegerValueIfChanged(self::VARIABLE_LampHours, $jvcProjectorConnection->GetLampHours());
             }
             catch (Exception $e)
@@ -443,8 +437,6 @@ class JvcProjectorControl extends BaseIPSModule
     
             try
             {
-                $this->LogDebug("Update Software Version");
-            
                 $softwareVersion = $jvcProjectorConnection->GetVersion();
             }
             catch (Exception $e)
@@ -462,10 +454,10 @@ class JvcProjectorControl extends BaseIPSModule
 
         if ($sourceStatus == JvcProjectorConnection::SOURCESTATUS_Okay)
         {
+            $this->LogDebug("Update variables for valid source");
+
             try
             {
-                $this->LogDebug("Update Color Space");
-
                 $colorSpace = $jvcProjectorConnection->GetColorSpace();
             }
             catch (Exception $e)
@@ -475,8 +467,6 @@ class JvcProjectorControl extends BaseIPSModule
 
             try
             {
-                $this->LogDebug("Update Color Model");
-
                 $colorModel = $jvcProjectorConnection->GetColorModel();
             }
             catch (Exception $e)
@@ -486,8 +476,6 @@ class JvcProjectorControl extends BaseIPSModule
             
             try
             {
-                $this->LogDebug("Update HDR Mode");
-
                 $hdrMode = $jvcProjectorConnection->GetHDRMode();
             }
             catch (Exception $e)
