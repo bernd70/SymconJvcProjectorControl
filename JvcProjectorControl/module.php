@@ -220,7 +220,8 @@ class JvcProjectorControl extends BaseIPSModule
                 $this->Log("Schalte Gerät ein");
 
                 $jvcProjectorConnection->PowerOn();
-                $jvcProjectorConnection->GetPowerStatus();
+
+                $this->UpdatePowerStatus($jvcProjectorConnection);
             }
             else if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
                 $this->LogWarning("PowerOn Kommando ignoriert, Gerät ist bereits eingeschaltet");
@@ -251,8 +252,10 @@ class JvcProjectorControl extends BaseIPSModule
             if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
             {
                 $this->Log("Schalte Gerät aus");
+
                 $jvcProjectorConnection->PowerOff();
-                $jvcProjectorConnection->GetPowerStatus();
+
+                $this->UpdatePowerStatus($jvcProjectorConnection);
             }
             else if ($powerStatus == JvcProjectorConnection::POWERSTATUS_Standby)
                 $this->LogWarning("PowerOff Kommando ignoriert, Gerät ist bereits ausgeschaltet");
@@ -384,9 +387,7 @@ class JvcProjectorControl extends BaseIPSModule
         {
             $this->LogDebug("Update Power Status");
 
-            $powerStatus = $jvcProjectorConnection->GetPowerStatus();
-            if ($this->UpdateIntegerValueIfChanged(self::VARIABLE_PowerStatus, $powerStatus))
-                SetValueBoolean($this->GetIDForIdent(self::VARIABLE_Power), $powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn);
+            $powerStatus = $this->UpdatePowerStatus($jvcProjectorConnection);
         }
         catch (Exception $e)
         {
@@ -503,6 +504,15 @@ class JvcProjectorControl extends BaseIPSModule
         $this->UpdateStringValueIfChanged(self::VARIABLE_ColorModel, $colorModel);
         $this->UpdateStringValueIfChanged(self::VARIABLE_HDRMode, $hdrMode);
 
+    }
+
+    private function UpdatePowerStatus(JvcProjectorConnection $jvcProjectorConnection) : int
+    {
+        $powerStatus = $jvcProjectorConnection->GetPowerStatus();
+        if ($this->UpdateIntegerValueIfChanged(self::VARIABLE_PowerStatus, $powerStatus))
+            SetValueBoolean($this->GetIDForIdent(self::VARIABLE_Power), $powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn);
+
+        return $powerStatus;
     }
 
     // Return true if the value was changed
