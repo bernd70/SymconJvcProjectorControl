@@ -29,8 +29,6 @@ class JvcProjectorControl extends BaseIPSModule
 
     const INPUT_Switching = 99;
 
-    var $projectorModel;
-
     public function Create()
     {
         // Diese Zeile nicht löschen
@@ -62,7 +60,7 @@ class JvcProjectorControl extends BaseIPSModule
 
             try
             {
-                $this->UpdateVariables($jvcProjectorConnection);
+                $this->UpdateVariables($jvcProjectorConnection, true);
 
                 $this->SetTimerInterval('Update', $this->ReadPropertyInteger(self::PROPERTY_UPDATEINTERVAL) * 1000);
             }
@@ -352,17 +350,16 @@ class JvcProjectorControl extends BaseIPSModule
         }            
     }
 
-    private function UpdateVariables(JvcProjectorConnection $jvcProjectorConnection)
+    private function UpdateVariables(JvcProjectorConnection $jvcProjectorConnection, bool $initialRun = false)
     {
-        // Only read beamer model once
-        if (!isset($this->projectorModel))
+        // Only read beamer model on initial run
+        if ($initialRun)
         {
+            $this->LogDebug("Get Projector Model and MAC address");
+
             try
             {
-                $this->LogDebug("Get Projector Model");
-
-                $this->projectorModel = $jvcProjectorConnection->GetModel();
-                $this->UpdateStringValueIfChanged(self::VARIABLE_Model, $this->projectorModel);
+                $this->UpdateStringValueIfChanged(self::VARIABLE_Model, $jvcProjectorConnection->GetModel());
             }
             catch (Exception $e)
             {
@@ -372,8 +369,6 @@ class JvcProjectorControl extends BaseIPSModule
 
             try
             {
-                $this->LogDebug("Get MAC address");
-
                 $this->UpdateStringValueIfChanged(self::VARIABLE_MACAddress, $jvcProjectorConnection->GetMACAddress());
             }
             catch (Exception $e)
