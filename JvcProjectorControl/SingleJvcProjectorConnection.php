@@ -9,7 +9,7 @@ class SingleJvcProjectorConnection extends JvcProjectorConnection
     public function Connect()
     {
         if (!IPS_SemaphoreEnter("JVCProjectorConnection", 5000))
-            throw new Exception("Es besteht berits eine Verbindung zum Projektor (Semaphore belegt)");
+            throw new Exception("Es besteht bereits eine Verbindung zum Projektor (Semaphore belegt)");
 
         parent::Connect();
     }

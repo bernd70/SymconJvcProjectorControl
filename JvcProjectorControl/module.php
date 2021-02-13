@@ -163,7 +163,7 @@ class JvcProjectorControl extends BaseIPSModule
 
         $this->LogDebug("Verbindungsaufbau zu Projektor " . $host . " auf Port " . $port);
 
-        $jvcProjectorConnection =  new SingleJvcProjectorConnection($host, $port);
+        $jvcProjectorConnection = new SingleJvcProjectorConnection($host, $port);
 
         $jvcProjectorConnection->Connect();
 
@@ -294,6 +294,7 @@ class JvcProjectorControl extends BaseIPSModule
             {
                 $this->Log("Schalte Eingang um auf [" . $jvcProjectorConnection-> TranslateInput($input) . "]");
                 
+                // Set intermediate switch state to give quicker feedback
                 SetValueInteger($this->GetIDForIdent(self::VARIABLE_Input), self::INPUT_Switching);
 
                 $jvcProjectorConnection->SwitchInput($input);  
