@@ -8,8 +8,6 @@ include "SingleJvcProjectorConnection.php";
 
 class JvcProjectorControl extends BaseIPSModule
 {
-    var $moduleName = "JvcProjectorControl";
-
     const PROPERTY_HOST = "Host";
     const PROPERTY_PORT = "Port";
     const PROPERTY_UPDATEINTERVAL = "UpdateInterval";
@@ -161,7 +159,7 @@ class JvcProjectorControl extends BaseIPSModule
 
         $port = $this->ReadPropertyInteger(self::PROPERTY_PORT);
 
-        $this->LogDebug("Verbindungsaufbau zu Projektor " . $host . " auf Port " . $port);
+        $this->SendDebug(__FUNCTION__, "host=" . $host . ", port=" . $port, 0);
 
         $jvcProjectorConnection = new SingleJvcProjectorConnection($host, $port);
 
@@ -172,7 +170,7 @@ class JvcProjectorControl extends BaseIPSModule
 
     public function RequestAction($ident, $value)
     {
-        $this->LogDebug("RequestAction(" . $ident . ", " . $value . ") aufgerufen");
+        $this->SendDebug(__FUNCTION__, "ident=" . $ident . ", value=" . $value, 0);
 
         switch ($ident)
         {
@@ -201,7 +199,7 @@ class JvcProjectorControl extends BaseIPSModule
         }
         catch (Exception $e) 
         {
-            $this->LogError("Fehler beim Ausführen von GetProjectorStatus Kommando: " . $e->getMessage());
+            $this->LogMessage("Fehler beim Ausführen von GetProjectorStatus Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
         }
     }
@@ -215,19 +213,19 @@ class JvcProjectorControl extends BaseIPSModule
             $powerStatus = $jvcProjectorConnection->GetPowerStatus();
             if ($powerStatus == JvcProjectorConnection::POWERSTATUS_Standby)
             {
-                $this->Log("Schalte Gerät ein");
+                $this->LogMessage("Schalte Gerät ein", KL_MESSAGE);
 
                 $jvcProjectorConnection->PowerOn();
 
                 $this->UpdatePowerStatus($jvcProjectorConnection);
             }
             else if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
-                $this->LogWarning("PowerOn Kommando ignoriert, Gerät ist bereits eingeschaltet");
+                $this->LogMessage("PowerOn Kommando ignoriert, Gerät ist bereits eingeschaltet", KL_WARNING);
             else if ($powerStatus == JvcProjectorConnection::POWERSTATUS_Starting)
-                $this->LogWarning("PowerOn Kommando ignoriert, Gerät startet bereits");
+                $this->LogMessage("PowerOn Kommando ignoriert, Gerät startet bereits", KL_WARNING);
             else
             {
-                $this->LogError("PowerOn Kommando bei Status [" . $jvcProjectorConnection->TranslatePowerStatus($powerStatus) . "] ungültig");
+                $this->LogMessage("PowerOn Kommando bei Status [" . $jvcProjectorConnection->TranslatePowerStatus($powerStatus) . "] ungültig", KL_ERROR);
                 return false;
             }
 
@@ -235,7 +233,7 @@ class JvcProjectorControl extends BaseIPSModule
         }
         catch (Exception $e) 
         {
-            $this->LogError("Fehler beim Ausführen von PowerOn Kommando: " . $e->getMessage());
+            $this->LogMessage("Fehler beim Ausführen von PowerOn Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
         }
     }
@@ -249,19 +247,19 @@ class JvcProjectorControl extends BaseIPSModule
             $powerStatus = $jvcProjectorConnection->GetPowerStatus();
             if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
             {
-                $this->Log("Schalte Gerät aus");
+                $this->LogMessage("Schalte Gerät aus", KL_MESSAGE);
 
                 $jvcProjectorConnection->PowerOff();
 
                 $this->UpdatePowerStatus($jvcProjectorConnection);
             }
             else if ($powerStatus == JvcProjectorConnection::POWERSTATUS_Standby)
-                $this->LogWarning("PowerOff Kommando ignoriert, Gerät ist bereits ausgeschaltet");
+                $this->LogMessage("PowerOff Kommando ignoriert, Gerät ist bereits ausgeschaltet", KL_WARNING);
             else if ($powerStatus == JvcProjectorConnection::POWERSTATUS_Cooldown)
-                $this->LogWarning("PowerOff Kommando ignoriert, Gerät fährt bereits herunter");
+                $this->LogMessage("PowerOff Kommando ignoriert, Gerät fährt bereits herunter", KL_WARNING);
             else
             {
-                $this->LogError("PowerOff Kommando bei Status [" . $jvcProjectorConnection->TranslatePowerStatus($powerStatus) . "] ungültig");
+                $this->LogMessage("PowerOff Kommando bei Status [" . $jvcProjectorConnection->TranslatePowerStatus($powerStatus) . "] ungültig", KL_ERROR);
                 return false;
             }
 
@@ -269,7 +267,7 @@ class JvcProjectorControl extends BaseIPSModule
         }
         catch (Exception $e) 
         {
-            $this->LogError("Fehler beim Ausführen von PowerOff Kommando: " . $e->getMessage());
+            $this->LogMessage("Fehler beim Ausführen von PowerOff Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
         }
     }
@@ -278,7 +276,7 @@ class JvcProjectorControl extends BaseIPSModule
     {
         if ($input == self::INPUT_Switching)
         {
-            $this->LogError("Ungültiger Eingang ausgewählt");
+            $this->LogMessage("Ungültiger Eingang ausgewählt", KL_ERROR);
             return;
         }
         
@@ -292,7 +290,7 @@ class JvcProjectorControl extends BaseIPSModule
             $currentInput = $jvcProjectorConnection->GetCurrentInput();
             if ($currentInput != $input)
             {
-                $this->Log("Schalte Eingang um auf [" . $jvcProjectorConnection-> TranslateInput($input) . "]");
+                $this->LogMessage("Schalte Eingang um auf [" . $jvcProjectorConnection-> TranslateInput($input) . "]", KL_MESSAGE);
                 
                 // Set intermediate switch state to give quicker feedback
                 SetValueInteger($this->GetIDForIdent(self::VARIABLE_Input), self::INPUT_Switching);
@@ -302,13 +300,13 @@ class JvcProjectorControl extends BaseIPSModule
                 $this->UpdateVariables($jvcProjectorConnection);
             }
             else
-                $this->LogWarning("SwitchInput Kommando ignoriert, aktueller Eingang ist bereits [" . $jvcProjectorConnection->TranslateInput($input) . "]");
+                $this->LogMessage("SwitchInput Kommando ignoriert, aktueller Eingang ist bereits [" . $jvcProjectorConnection->TranslateInput($input) . "]", KL_WARNING);
 
             return true;
         }
         catch (Exception $e) 
         {
-            $this->LogError("Fehler beim Ausführen von SwitchInput Kommando: " . $e->getMessage());
+            $this->LogMessage("Fehler beim Ausführen von SwitchInput Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
         }        
     }
@@ -328,7 +326,7 @@ class JvcProjectorControl extends BaseIPSModule
         }
         catch (Exception $e) 
         {
-            $this->LogError("Fehler beim Ausführen von SetLampPower Kommando: " . $e->getMessage());
+            $this->LogMessage("Fehler beim Ausführen von SetLampPower Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
         }        
     }    
@@ -342,7 +340,7 @@ class JvcProjectorControl extends BaseIPSModule
             if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
                 return true;
 
-            $this->LogError("Funktion " . $function . " kann nur ausgeführt werden, wenn das Gerät eingeschaltet ist.");
+            $this->LogMessage("Funktion " . $function . " kann nur ausgeführt werden, wenn das Gerät eingeschaltet ist.", KL_ERROR);
             return false;
         }
         catch (Exception $e) 
@@ -356,7 +354,7 @@ class JvcProjectorControl extends BaseIPSModule
         // Only read beamer model on initial run
         if ($initialRun)
         {
-            $this->LogDebug("Get Projector Model and MAC address");
+            $this->SendDebug(__FUNCTION__, "Get Projector Model and MAC address", 0);
 
             try
             {
@@ -364,7 +362,7 @@ class JvcProjectorControl extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogError("Fehler beim Ermitteln von Model: " . $e->getMessage());
+                $this->LogMessage("Fehler beim Ermitteln von Model: " . $e->getMessage(), KL_ERROR);
                 $this->UpdateStringValueIfChanged(self::VARIABLE_Model, $this->Translate("Unknown"));
             }
 
@@ -374,20 +372,20 @@ class JvcProjectorControl extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogError("Fehler beim Ermitteln von MAC Adresse: " . $e->getMessage());
+                $this->LogMessage("Fehler beim Ermitteln von MAC Adresse: " . $e->getMessage(), KL_ERROR);
                 $this->UpdateStringValueIfChanged(self::VARIABLE_MACAddress, $this->Translate("Unknown"));
             }
         }
 
         try
         {
-            $this->LogDebug("Update Power Status");
+            $this->SendDebug(__FUNCTION__, "Update Power Status", 0);
 
             $powerStatus = $this->UpdatePowerStatus($jvcProjectorConnection);
         }
         catch (Exception $e)
         {
-            $this->LogError("Fehler beim Ermitteln von PowerStatus: " . $e->getMessage());
+            $this->LogMessage("Fehler beim Ermitteln von PowerStatus: " . $e->getMessage(), KL_ERROR);
             $this->UpdateIntegerValueIfChanged(self::VARIABLE_PowerStatus, JvcProjectorConnection::POWERSTATUS_Unknown);
         }
 
@@ -397,7 +395,7 @@ class JvcProjectorControl extends BaseIPSModule
 
         if ($powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn)
         {
-            $this->LogDebug("Update variables for powered on projector");
+            $this->SendDebug(__FUNCTION__, "Update variables for powered on projector", 0);
 
             try
             {
@@ -405,7 +403,7 @@ class JvcProjectorControl extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogError("Fehler beim Ermitteln von Current Input: " . $e->getMessage());
+                $this->LogMessage("Fehler beim Ermitteln von Current Input: " . $e->getMessage(), KL_ERROR);
             }
     
             try
@@ -414,7 +412,7 @@ class JvcProjectorControl extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogError("Fehler beim Ermitteln von Source Status: " . $e->getMessage());
+                $this->LogMessage("Fehler beim Ermitteln von Source Status: " . $e->getMessage(), KL_ERROR);
             }
     
             try
@@ -423,7 +421,7 @@ class JvcProjectorControl extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogError("Fehler beim Ermitteln von Signal: " . $e->getMessage());
+                $this->LogMessage("Fehler beim Ermitteln von Signal: " . $e->getMessage(), KL_ERROR);
             }
 
             try
@@ -432,7 +430,7 @@ class JvcProjectorControl extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogError("Fehler beim Ermitteln von Lamp Hours: " . $e->getMessage());
+                $this->LogMessage("Fehler beim Ermitteln von Lamp Hours: " . $e->getMessage(), KL_ERROR);
             }
     
             try
@@ -441,7 +439,7 @@ class JvcProjectorControl extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogError("Fehler beim Ermitteln von Software Version: " . $e->getMessage());
+                $this->LogMessage("Fehler beim Ermitteln von Software Version: " . $e->getMessage(), KL_ERROR);
             }
         }
 
@@ -454,7 +452,7 @@ class JvcProjectorControl extends BaseIPSModule
 
         if ($sourceStatus == JvcProjectorConnection::SOURCESTATUS_Okay)
         {
-            $this->LogDebug("Update variables for valid source");
+            $this->SendDebug(__FUNCTION__, "Update variables for valid source", 0);
 
             try
             {
@@ -462,7 +460,7 @@ class JvcProjectorControl extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogError("Fehler beim Ermitteln von Color Space: " . $e->getMessage());
+                $this->LogMessage("Fehler beim Ermitteln von Color Space: " . $e->getMessage(), KL_ERROR);
             }            
 
             try
@@ -471,7 +469,7 @@ class JvcProjectorControl extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogError("Fehler beim Ermitteln von Color Model: " . $e->getMessage());
+                $this->LogMessage("Fehler beim Ermitteln von Color Model: " . $e->getMessage(), KL_ERROR);
             }  
             
             try
@@ -480,7 +478,7 @@ class JvcProjectorControl extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogError("Fehler beim Ermitteln von HDR Mode: " . $e->getMessage());
+                $this->LogMessage("Fehler beim Ermitteln von HDR Mode: " . $e->getMessage(), KL_ERROR);
             }
         }
 
@@ -497,43 +495,6 @@ class JvcProjectorControl extends BaseIPSModule
             SetValueBoolean($this->GetIDForIdent(self::VARIABLE_Power), $powerStatus == JvcProjectorConnection::POWERSTATUS_PoweredOn);
 
         return $powerStatus;
-    }
-
-    // Return true if the value was changed
-    private function UpdateIntegerValueIfChanged(string $varIdent, int $newValue) : bool
-    {
-        if ($newValue === false)
-            return false;
-
-        $oldValue = GetValueInteger($this->GetIDForIdent($varIdent));
-
-        if ($oldValue != $newValue)
-        {
-            $this->LogDebug("Setze " . $varIdent . " von " . $oldValue . " auf " . $newValue);
-
-            SetValueInteger($this->GetIDForIdent($varIdent), $newValue);
-            return true;
-        }
-
-        return false;
-    }
-
-    private function UpdateStringValueIfChanged(string $varIdent, string $newValue) : bool
-    {
-        if ($newValue === false)
-            return false;
-
-        $oldValue = GetValueString($this->GetIDForIdent($varIdent));
-
-        if ($oldValue != $newValue)
-        {
-            $this->LogDebug("Setze " . $varIdent . " von " . $oldValue . " auf " . $newValue);
-
-            SetValueString($this->GetIDForIdent($varIdent), $newValue);
-            return true;
-        }
-
-        return false;
     }
 }
 

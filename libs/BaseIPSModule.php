@@ -4,18 +4,7 @@ declare(strict_types=1);
 
 class BaseIPSModule extends IPSModule
 {
-    var $moduleName = "BaseIPSModule";
-
-    const PROPERTY_ExtendedLogging = "ExtendedLogging";
-
     const STRING_DateTimeFormat = "j.n.Y, H:i:s";
-
-    public function Create()
-    {
-        parent::Create();
-
-        $this->RegisterPropertyBoolean(self::PROPERTY_ExtendedLogging, false);
-    }
 
     public function Destroy()
     {
@@ -31,7 +20,7 @@ class BaseIPSModule extends IPSModule
 
         if ($registeredMessages !== false)
         {
-            $this->LogDebug("Unregistering " . count($registeredMessages) . " message notifications");
+            $this->SendDebug(__FUNCTION__, "Unregistering " . count($registeredMessages) . " message notifications", 0);
 
             foreach ($registeredMessages as $sender => $msgList) 
             {
@@ -39,33 +28,43 @@ class BaseIPSModule extends IPSModule
                     $this->UnregisterMessage($sender, $msg);
             }
         }
+    }
+
+
+    // Return true if the value was changed
+    protected function UpdateIntegerValueIfChanged(string $varIdent, int $newValue) : bool
+    {
+        if ($newValue === false)
+            return false;
+
+        $oldValue = GetValueInteger($this->GetIDForIdent($varIdent));
+        if ($oldValue != $newValue)
+        {
+            $this->SendDebug(__FUNCTION__, "Update ident=" . $varIdent . ", oldValue=" . $oldValue . ", newValue=" . $newValue, 0);
+
+            SetValueInteger($this->GetIDForIdent($varIdent), $newValue);
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function UpdateStringValueIfChanged(string $varIdent, string $newValue) : bool
+    {
+        if ($newValue === false)
+            return false;
+
+        $oldValue = GetValueString($this->GetIDForIdent($varIdent));
+        if ($oldValue != $newValue)
+        {
+            $this->SendDebug(__FUNCTION__, "Update ident=" . $varIdent . ", oldValue=" . $oldValue . ", newValue=" . $newValue, 0);
+
+            SetValueString($this->GetIDForIdent($varIdent), $newValue);
+            return true;
+        }
+
+        return false;
     }    
-
-    protected function Log(string $logMessage)
-    {
-        IPS_LogMessage($this->moduleName, $logMessage);
-    }
-
-    protected function LogWarning(string $logMessage, bool $extendedLogMessage = false)
-    {
-        if ($extendedLogMessage && !$this->ReadPropertyBoolean(self::PROPERTY_ExtendedLogging))
-            return;
-    
-        IPS_LogMessage($this->moduleName, "[WARN] " . $logMessage);
-    }
-
-    protected function LogError(string $logMessage)
-    {
-        IPS_LogMessage($this->moduleName, "[ERROR] " . $logMessage);
-    }
-
-    protected function LogDebug(string $logMessage)
-    {
-        if (!$this->ReadPropertyBoolean(self::PROPERTY_ExtendedLogging))
-            return;
-    
-        IPS_LogMessage($this->moduleName, "[EXTENDED] " . $logMessage);
-    }
 }
 
 ?>

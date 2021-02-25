@@ -16,12 +16,6 @@
             "type": "NumberSpinner",
             "caption": "Polling interval",
             "suffix": "seconds"
-        },
-        {
-            "type": "CheckBox",
-            "name": "ExtendedLogging",
-            "caption": "Activate exteded logging",
-            "value": false
         }        
     ],
     "actions":
