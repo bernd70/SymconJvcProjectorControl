@@ -55,7 +55,6 @@ Name                           | Beschreibung
 Hostname                       | Netzwerkname oder IP Adresse des JVC Projektors
 Port                           | TVP Port des Pojektors (Default: 20554)
 Abfrageintervall               | In welchem Abstand soll der Projektor abgefragt werden. (Default: 10 Sekunden)
-Erweitertes Logging aktivieren | Zusätzliche Informationen protokollieren
 Button "Einschalten"           | Schaltet den Projektor ein
 Button "Ausschalten"           | Schaltet den Projektor in den Standby.
 
