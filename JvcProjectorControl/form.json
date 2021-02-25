@@ -31,7 +31,7 @@
     ],
     "status":
     [
-        { "code": 201, "icon": "error", "caption": "Projector unreadable" },
+        { "code": 201, "icon": "error", "caption": "Projector unreachable" },
         { "code": 202, "icon": "error", "caption": "Communication failure" }
     ]
   }
