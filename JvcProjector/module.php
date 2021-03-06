@@ -6,7 +6,7 @@ require_once __DIR__ . '/../libs/BaseIPSModule.php';
 
 include "SingleJvcProjectorConnection.php";
 
-class JvcProjectorControl extends BaseIPSModule
+class JvcProjector extends BaseIPSModule
 {
     const PROPERTY_HOST = "Host";
     const PROPERTY_PORT = "Port";
@@ -36,7 +36,7 @@ class JvcProjectorControl extends BaseIPSModule
         $this->RegisterVariableProfiles();
         $this->RegisterVariables();
 
-        $this->RegisterTimer('Update', 0, 'JvcProjectorControl_GetProjectorStatus($_IPS[\'TARGET\'], 0);');        
+        $this->RegisterTimer('Update', 0, 'JvcProjector_GetProjectorStatus($_IPS[\'TARGET\'], 0);');        
     }
 
     public function ApplyChanges()
@@ -82,65 +82,65 @@ class JvcProjectorControl extends BaseIPSModule
 
     private function RegisterVariableProfiles()
     {
-        if (!IPS_VariableProfileExists("JvcProjectorControl.PowerStatus"))
+        if (!IPS_VariableProfileExists("JvcProjector.PowerStatus"))
         {
-            IPS_CreateVariableProfile("JvcProjectorControl.PowerStatus", 1);
+            IPS_CreateVariableProfile("JvcProjector.PowerStatus", 1);
 
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_Unknown, $this->Translate("Unknown"), "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_Standby, $this->Translate("Standby"), "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_Starting, $this->Translate("Starting"), "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_PoweredOn, $this->Translate("Powered On"), "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_Cooldown, $this->Translate("Cooling down"), "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.PowerStatus", JvcProjectorConnection::POWERSTATUS_Emergency, $this->Translate("Emergency"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.PowerStatus", JvcProjectorConnection::POWERSTATUS_Unknown, $this->Translate("Unknown"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.PowerStatus", JvcProjectorConnection::POWERSTATUS_Standby, $this->Translate("Standby"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.PowerStatus", JvcProjectorConnection::POWERSTATUS_Starting, $this->Translate("Starting"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.PowerStatus", JvcProjectorConnection::POWERSTATUS_PoweredOn, $this->Translate("Powered On"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.PowerStatus", JvcProjectorConnection::POWERSTATUS_Cooldown, $this->Translate("Cooling down"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.PowerStatus", JvcProjectorConnection::POWERSTATUS_Emergency, $this->Translate("Emergency"), "", -1);
         }        
 
-        if (!IPS_VariableProfileExists("JvcProjectorControl.Input"))
+        if (!IPS_VariableProfileExists("JvcProjector.Input"))
         {
-            IPS_CreateVariableProfile("JvcProjectorControl.Input", 1);
+            IPS_CreateVariableProfile("JvcProjector.Input", 1);
 
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_Unknown, $this->Translate("Unknown"), "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_HDMI1, "HDMI #1", "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_HDMI2, "HDMI #2", "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_Component, "Component", "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_PC, "PC", "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_Video, "Video", "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", JvcProjectorConnection::INPUT_SVideo, "S-Video", "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.Input", self::INPUT_Switching, $this->Translate("Switching"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.Input", JvcProjectorConnection::INPUT_Unknown, $this->Translate("Unknown"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.Input", JvcProjectorConnection::INPUT_HDMI1, "HDMI #1", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.Input", JvcProjectorConnection::INPUT_HDMI2, "HDMI #2", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.Input", JvcProjectorConnection::INPUT_Component, "Component", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.Input", JvcProjectorConnection::INPUT_PC, "PC", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.Input", JvcProjectorConnection::INPUT_Video, "Video", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.Input", JvcProjectorConnection::INPUT_SVideo, "S-Video", "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.Input", self::INPUT_Switching, $this->Translate("Switching"), "", -1);
         }     
         
 
-        if (!IPS_VariableProfileExists("JvcProjectorControl.SourceStatus"))
+        if (!IPS_VariableProfileExists("JvcProjector.SourceStatus"))
         {
-            IPS_CreateVariableProfile("JvcProjectorControl.SourceStatus", 1);
+            IPS_CreateVariableProfile("JvcProjector.SourceStatus", 1);
 
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_Unknown, $this->Translate("Unknown"), "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_JVCLogo, $this->Translate("JVC Logo"), "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_NoValidSignal, $this->Translate("No valid signal"), "", -1);
-            IPS_SetVariableProfileAssociation("JvcProjectorControl.SourceStatus", JvcProjectorConnection::SOURCESTATUS_Okay, $this->Translate("Okay"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.SourceStatus", JvcProjectorConnection::SOURCESTATUS_Unknown, $this->Translate("Unknown"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.SourceStatus", JvcProjectorConnection::SOURCESTATUS_JVCLogo, $this->Translate("JVC Logo"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.SourceStatus", JvcProjectorConnection::SOURCESTATUS_NoValidSignal, $this->Translate("No valid signal"), "", -1);
+            IPS_SetVariableProfileAssociation("JvcProjector.SourceStatus", JvcProjectorConnection::SOURCESTATUS_Okay, $this->Translate("Okay"), "", -1);
         }         
 
 
-        if (!IPS_VariableProfileExists("JvcProjectorControl.Duration.Hours"))
+        if (!IPS_VariableProfileExists("JvcProjector.Duration.Hours"))
         {
-            IPS_CreateVariableProfile("JvcProjectorControl.Duration.Hours", 1);
+            IPS_CreateVariableProfile("JvcProjector.Duration.Hours", 1);
 
-            IPS_SetVariableProfileText("JvcProjectorControl.Duration.Hours", "", " Stunden");
-            IPS_SetVariableProfileIcon("JvcProjectorControl.Duration.Hours", "Clock");
+            IPS_SetVariableProfileText("JvcProjector.Duration.Hours", "", " Stunden");
+            IPS_SetVariableProfileIcon("JvcProjector.Duration.Hours", "Clock");
         }            
     }
 
     private function RegisterVariables()
     {
         $this->RegisterVariableBoolean(self::VARIABLE_Power, "Power", "~Switch", 1);
-        $this->RegisterVariableInteger(self::VARIABLE_PowerStatus, $this->Translate("Power Status"), "JvcProjectorControl.PowerStatus", 2);
-        $this->RegisterVariableInteger(self::VARIABLE_Input, $this->Translate("Current input"), "JvcProjectorControl.Input", 3);
-        $this->RegisterVariableInteger(self::VARIABLE_SourceStatus, $this->Translate("Source Status"), "JvcProjectorControl.SourceStatus", 4);
+        $this->RegisterVariableInteger(self::VARIABLE_PowerStatus, $this->Translate("Power Status"), "JvcProjector.PowerStatus", 2);
+        $this->RegisterVariableInteger(self::VARIABLE_Input, $this->Translate("Current input"), "JvcProjector.Input", 3);
+        $this->RegisterVariableInteger(self::VARIABLE_SourceStatus, $this->Translate("Source Status"), "JvcProjector.SourceStatus", 4);
         $this->RegisterVariableString(self::VARIABLE_Signal, $this->Translate("Signal"), "", 5);
         $this->RegisterVariableString(self::VARIABLE_ColorSpace, $this->Translate("Color space"), "", 6);
         $this->RegisterVariableString(self::VARIABLE_ColorModel, $this->Translate("Color model"), "", 7);
         $this->RegisterVariableString(self::VARIABLE_HDRMode, $this->Translate("HDR mode"), "", 8);
 
-        $this->RegisterVariableInteger(self::VARIABLE_LampHours, $this->Translate("Lamp hours"), "JvcProjectorControl.Duration.Hours", 10);
+        $this->RegisterVariableInteger(self::VARIABLE_LampHours, $this->Translate("Lamp hours"), "JvcProjector.Duration.Hours", 10);
 
         $this->RegisterVariableString(self::VARIABLE_Model, $this->Translate("Model"), "", 20);
         $this->RegisterVariableString(self::VARIABLE_Version, $this->Translate("Firmware"), "", 21);

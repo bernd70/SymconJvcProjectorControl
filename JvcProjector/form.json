@@ -20,8 +20,8 @@
     ],
     "actions":
     [
-        { "type": "Button", "label": "Power On", "onClick": "JvcProjectorControl_PowerOn($id);" },
-        { "type": "Button", "label": "Power Off", "onClick": "JvcProjectorControl_PowerOff($id);" }
+        { "type": "Button", "label": "Power On", "onClick": "JvcProjector_PowerOn($id);" },
+        { "type": "Button", "label": "Power Off", "onClick": "JvcProjector_PowerOff($id);" }
     ],
     "status":
     [
