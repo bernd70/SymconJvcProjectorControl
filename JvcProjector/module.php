@@ -36,7 +36,7 @@ class JvcProjector extends BaseIPSModule
         $this->RegisterVariableProfiles();
         $this->RegisterVariables();
 
-        $this->RegisterTimer('Update', 0, 'JvcProjector_GetProjectorStatus($_IPS[\'TARGET\'], 0);');        
+        $this->RegisterTimer('Update', 0, 'JvcProjector_GetProjectorStatus($_IPS[\'TARGET\'], 0);');
     }
 
     public function ApplyChanges()
@@ -61,6 +61,8 @@ class JvcProjector extends BaseIPSModule
                 $this->UpdateVariables($jvcProjectorConnection, true);
 
                 $this->SetTimerInterval('Update', $this->ReadPropertyInteger(self::PROPERTY_UPDATEINTERVAL) * 1000);
+
+                $this->SetStatus(102);
             }
             catch (Exception $e)
             {
@@ -92,7 +94,7 @@ class JvcProjector extends BaseIPSModule
             IPS_SetVariableProfileAssociation("JvcProjector.PowerStatus", JvcProjectorConnection::POWERSTATUS_PoweredOn, $this->Translate("Powered On"), "", -1);
             IPS_SetVariableProfileAssociation("JvcProjector.PowerStatus", JvcProjectorConnection::POWERSTATUS_Cooldown, $this->Translate("Cooling down"), "", -1);
             IPS_SetVariableProfileAssociation("JvcProjector.PowerStatus", JvcProjectorConnection::POWERSTATUS_Emergency, $this->Translate("Emergency"), "", -1);
-        }        
+        }
 
         if (!IPS_VariableProfileExists("JvcProjector.Input"))
         {
@@ -106,8 +108,8 @@ class JvcProjector extends BaseIPSModule
             IPS_SetVariableProfileAssociation("JvcProjector.Input", JvcProjectorConnection::INPUT_Video, "Video", "", -1);
             IPS_SetVariableProfileAssociation("JvcProjector.Input", JvcProjectorConnection::INPUT_SVideo, "S-Video", "", -1);
             IPS_SetVariableProfileAssociation("JvcProjector.Input", self::INPUT_Switching, $this->Translate("Switching"), "", -1);
-        }     
-        
+        }
+
 
         if (!IPS_VariableProfileExists("JvcProjector.SourceStatus"))
         {
@@ -117,7 +119,7 @@ class JvcProjector extends BaseIPSModule
             IPS_SetVariableProfileAssociation("JvcProjector.SourceStatus", JvcProjectorConnection::SOURCESTATUS_JVCLogo, $this->Translate("JVC Logo"), "", -1);
             IPS_SetVariableProfileAssociation("JvcProjector.SourceStatus", JvcProjectorConnection::SOURCESTATUS_NoValidSignal, $this->Translate("No valid signal"), "", -1);
             IPS_SetVariableProfileAssociation("JvcProjector.SourceStatus", JvcProjectorConnection::SOURCESTATUS_Okay, $this->Translate("Okay"), "", -1);
-        }         
+        }
 
 
         if (!IPS_VariableProfileExists("JvcProjector.Duration.Hours"))
@@ -126,7 +128,7 @@ class JvcProjector extends BaseIPSModule
 
             IPS_SetVariableProfileText("JvcProjector.Duration.Hours", "", " Stunden");
             IPS_SetVariableProfileIcon("JvcProjector.Duration.Hours", "Clock");
-        }            
+        }
     }
 
     private function RegisterVariables()
@@ -185,7 +187,7 @@ class JvcProjector extends BaseIPSModule
                 $this->SwitchInput($value);
                 break;
             }
-    }    
+    }
 
     public function GetProjectorStatus()
     {
@@ -197,7 +199,7 @@ class JvcProjector extends BaseIPSModule
 
             return true;
         }
-        catch (Exception $e) 
+        catch (Exception $e)
         {
             $this->LogMessage("Fehler beim Ausführen von GetProjectorStatus Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
@@ -231,7 +233,7 @@ class JvcProjector extends BaseIPSModule
 
             return true;
         }
-        catch (Exception $e) 
+        catch (Exception $e)
         {
             $this->LogMessage("Fehler beim Ausführen von PowerOn Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
@@ -265,7 +267,7 @@ class JvcProjector extends BaseIPSModule
 
             return true;
         }
-        catch (Exception $e) 
+        catch (Exception $e)
         {
             $this->LogMessage("Fehler beim Ausführen von PowerOff Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
@@ -279,7 +281,7 @@ class JvcProjector extends BaseIPSModule
             $this->LogMessage("Ungültiger Eingang ausgewählt", KL_ERROR);
             return;
         }
-        
+
         try
         {
             $jvcProjectorConnection = $this->Connect();
@@ -291,11 +293,11 @@ class JvcProjector extends BaseIPSModule
             if ($currentInput != $input)
             {
                 $this->LogMessage("Schalte Eingang um auf [" . $jvcProjectorConnection-> TranslateInput($input) . "]", KL_MESSAGE);
-                
+
                 // Set intermediate switch state to give quicker feedback
                 SetValueInteger($this->GetIDForIdent(self::VARIABLE_Input), self::INPUT_Switching);
 
-                $jvcProjectorConnection->SwitchInput($input);  
+                $jvcProjectorConnection->SwitchInput($input);
 
                 $this->UpdateVariables($jvcProjectorConnection);
             }
@@ -304,11 +306,11 @@ class JvcProjector extends BaseIPSModule
 
             return true;
         }
-        catch (Exception $e) 
+        catch (Exception $e)
         {
             $this->LogMessage("Fehler beim Ausführen von SwitchInput Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
-        }        
+        }
     }
 
     public function SetLampPower(bool $high)
@@ -324,12 +326,12 @@ class JvcProjector extends BaseIPSModule
 
             return true;
         }
-        catch (Exception $e) 
+        catch (Exception $e)
         {
             $this->LogMessage("Fehler beim Ausführen von SetLampPower Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
-        }        
-    }    
+        }
+    }
 
     private function CheckPower(JvcProjectorConnection $jvcProjectorConnection, string $function) : bool
     {
@@ -343,10 +345,10 @@ class JvcProjector extends BaseIPSModule
             $this->LogMessage("Funktion " . $function . " kann nur ausgeführt werden, wenn das Gerät eingeschaltet ist.", KL_ERROR);
             return false;
         }
-        catch (Exception $e) 
+        catch (Exception $e)
         {
             throw new Exception("Fehler beim Ausführen von GetPowerStatus Kommando: " . $e->getMessage());
-        }            
+        }
     }
 
     private function UpdateVariables(JvcProjectorConnection $jvcProjectorConnection, bool $initialRun = false)
@@ -405,7 +407,7 @@ class JvcProjector extends BaseIPSModule
             {
                 $this->LogMessage("Fehler beim Ermitteln von Current Input: " . $e->getMessage(), KL_ERROR);
             }
-    
+
             try
             {
                 $sourceStatus = $jvcProjectorConnection->GetSourceStatus();
@@ -414,7 +416,7 @@ class JvcProjector extends BaseIPSModule
             {
                 $this->LogMessage("Fehler beim Ermitteln von Source Status: " . $e->getMessage(), KL_ERROR);
             }
-    
+
             try
             {
                 $signal = $jvcProjectorConnection->GetSignal();
@@ -432,7 +434,7 @@ class JvcProjector extends BaseIPSModule
             {
                 $this->LogMessage("Fehler beim Ermitteln von Lamp Hours: " . $e->getMessage(), KL_ERROR);
             }
-    
+
             try
             {
                 $softwareVersion = $jvcProjectorConnection->GetVersion();
@@ -461,7 +463,7 @@ class JvcProjector extends BaseIPSModule
             catch (Exception $e)
             {
                 $this->LogMessage("Fehler beim Ermitteln von Color Space: " . $e->getMessage(), KL_ERROR);
-            }            
+            }
 
             try
             {
@@ -470,8 +472,8 @@ class JvcProjector extends BaseIPSModule
             catch (Exception $e)
             {
                 $this->LogMessage("Fehler beim Ermitteln von Color Model: " . $e->getMessage(), KL_ERROR);
-            }  
-            
+            }
+
             try
             {
                 $hdrMode = $jvcProjectorConnection->GetHDRMode();
