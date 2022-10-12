@@ -66,11 +66,15 @@ class JvcProjector extends BaseIPSModule
             }
             catch (Exception $e)
             {
+                $this->LogMessage("Fehler bei der Kommunikation: " . $e->getMessage(), KL_ERROR);
+
                 $this->SetStatus(202);
             }
         }
         catch (Exception $e)
         {
+            $this->LogMessage("Fehler beim Verbindungsaufbau: " . $e->getMessage(), KL_ERROR);
+
             $this->SetStatus(201);
         }
     }
