@@ -37,7 +37,7 @@ class JvcProjectorConnection
     function __construct(string $host = "", int $port = 20554)
     {
         $this->SetServer($host, $port);
-    }    
+    }
 
     function __destruct()
     {
@@ -53,7 +53,7 @@ class JvcProjectorConnection
     public function Connect()
     {
         $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        if ($this->socket === false) 
+        if ($this->socket === false)
             throw new Exception("socket_create() fehlgeschlagen: " . socket_strerror(socket_last_error()));
 
         socket_set_option($this->socket, SOL_SOCKET, SO_RCVTIMEO, array("sec" => 5, "usec" => 0));
@@ -77,10 +77,10 @@ class JvcProjectorConnection
                     continue;
             }
             $error = "socket_connect() fehlgeschlagen: ($socketError) " . socket_strerror($socketError);
-        
+
             socket_close($this->socket);
             unset($this->socket);
-        
+
             throw new Exception($error);
         }
 
@@ -119,6 +119,11 @@ class JvcProjectorConnection
         $this->isConnected = false;
     }
 
+    public function IsConnected()
+    {
+        return $this->isConnected;
+    }
+
     public function TestCommunication() : bool
     {
         try
@@ -154,11 +159,11 @@ class JvcProjectorConnection
 
             return $data;
         }
-        catch (Exception $e) 
+        catch (Exception $e)
         {
             return "FAIL (" . $e->getMessage() . ")";
         }
-    }    
+    }
 
     public function GetModel() : string
     {
@@ -261,7 +266,7 @@ class JvcProjectorConnection
             case "1":
                 $colorModel .= " 10 bit";
                 break;
-    
+
             case "2":
                 $colorModel .= " 12 bit";
                 break;
@@ -273,7 +278,7 @@ class JvcProjectorConnection
     public function GetColorSpace() : string
     {
         $colorSapce = $this->ExecuteAdvancedRequest("IFCM");
-        
+
         return $this->mappings->GetColorSpace($colorSapce, self::STRING_Unknown);
     }
 
@@ -365,7 +370,7 @@ class JvcProjectorConnection
         $expectedAnswer = "\x06\x89\x01" . substr($requestData, 3 ,2) . "\x0a";
 
         $data = $this->ReadFromSocket();
-      
+
         if ($data != $expectedAnswer)
             throw new Exception("Unerwartete Antwort vom Beamer auf Request [" . $requestData . "]: " . $this->ResponseToHexString($data));
 
@@ -406,7 +411,7 @@ class JvcProjectorConnection
 
         for ($i=0; $i<$length; $i++)
             $hexCodes[] = bin2hex($recvData[$i]);
-    
+
         return implode(" ", $hexCodes);
     }
 
@@ -438,7 +443,7 @@ class JvcProjectorConnection
             default: return "INVALID [" . $input . "]";
 
         }
-    }    
+    }
 
     function TranslateSourceStatus(int $sourceStatus) : string
     {

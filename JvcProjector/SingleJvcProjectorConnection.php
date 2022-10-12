@@ -31,6 +31,9 @@ class SingleJvcProjectorConnection extends JvcProjectorConnection
 
     public function Disconnect()
     {
+        if (!parent::IsConnected())
+            return;
+
         try
         {
             parent::Disconnect();
