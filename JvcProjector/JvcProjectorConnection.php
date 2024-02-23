@@ -76,7 +76,7 @@ class JvcProjectorConnection
                 if ($retries > 0)
                     continue;
             }
-            $error = "socket_connect() fehlgeschlagen: ($socketError) " . socket_strerror($socketError);
+            $error = "socket_connect() fehlgeschlagen: " . socket_strerror($socketError);
 
             socket_close($this->socket);
             unset($this->socket);

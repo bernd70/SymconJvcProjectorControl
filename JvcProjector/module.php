@@ -27,6 +27,8 @@ class JvcProjector extends BaseIPSModule
 
     const INPUT_Switching = 99;
 
+    private bool $initialRun = true;
+
     public function Create()
     {
         // Diese Zeile nicht löschen
@@ -36,7 +38,7 @@ class JvcProjector extends BaseIPSModule
         $this->RegisterVariableProfiles();
         $this->RegisterVariables();
 
-        $this->RegisterTimer('Update', 0, 'JvcProjector_GetProjectorStatus($_IPS[\'TARGET\'], 0);');
+        $this->RegisterTimer('Update', 0, 'JvcProjector_UpdateProjectorStatus($_IPS[\'TARGET\']);');
     }
 
     public function ApplyChanges()
@@ -58,7 +60,7 @@ class JvcProjector extends BaseIPSModule
 
             try
             {
-                $this->UpdateVariables($jvcProjectorConnection, true);
+                $this->UpdateVariables($jvcProjectorConnection);
 
                 $this->SetTimerInterval('Update', $this->ReadPropertyInteger(self::PROPERTY_UPDATEINTERVAL) * 1000);
 
@@ -193,7 +195,7 @@ class JvcProjector extends BaseIPSModule
             }
     }
 
-    public function GetProjectorStatus()
+    public function UpdateProjectorStatus()
     {
         try
         {
@@ -205,13 +207,15 @@ class JvcProjector extends BaseIPSModule
         }
         catch (Exception $e)
         {
-            $this->LogMessage("Fehler beim Ausführen von GetProjectorStatus Kommando: " . $e->getMessage(), KL_ERROR);
+            $this->LogMessage("Fehler beim Ausführen von UpdateProjectorStatus Kommando: " . $e->getMessage(), KL_ERROR);
             return false;
         }
     }
 
     public function PowerOn()
     {
+        $this->LogMessage("Schalte Projektor ein", KL_NOTIFY);
+
         try
         {
             $jvcProjectorConnection = $this->Connect();
@@ -246,6 +250,8 @@ class JvcProjector extends BaseIPSModule
 
     public function PowerOff()
     {
+        $this->LogMessage("Schalte Projektor aus", KL_NOTIFY);
+
         try
         {
             $jvcProjectorConnection = $this->Connect();
@@ -280,6 +286,8 @@ class JvcProjector extends BaseIPSModule
 
     public function SwitchInput(int $input)
     {
+        $this->LogMessage("Schalte Eingang um auf " . $input, KL_NOTIFY);
+
         if ($input == self::INPUT_Switching)
         {
             $this->LogMessage("Ungültiger Eingang ausgewählt", KL_ERROR);
@@ -319,6 +327,8 @@ class JvcProjector extends BaseIPSModule
 
     public function SetLampPower(bool $high)
     {
+        $this->LogMessage("Setze Powermodus Lampe auf " . $high, KL_NOTIFY);
+
         try
         {
             $jvcProjectorConnection = $this->Connect();
@@ -368,7 +378,7 @@ class JvcProjector extends BaseIPSModule
             }
             catch (Exception $e)
             {
-                $this->LogMessage("Fehler beim Ermitteln von Model: " . $e->getMessage(), KL_ERROR);
+                $this->LogMessage("Fehler beim Ermitteln von Modell: " . $e->getMessage(), KL_ERROR);
                 $this->UpdateStringValueIfChanged(self::VARIABLE_Model, $this->Translate("Unknown"));
             }
 
