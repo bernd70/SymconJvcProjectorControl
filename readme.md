@@ -34,7 +34,7 @@ Mehr brauche ich persönlich in der täglichen Nutzung nicht. Ich kann aber bei 
 
 Die Einrichtung erfolgt über die Modulverwaltung von Symcon.
 
-Über das Modul-Control folgende URL hinzufügen: `git://github.com/bernd70/SymconJvcProjectorControl.git`  
+Über das Modul-Control folgende URL hinzufügen: `git://github.com/bernd70/SymconJvcProjectorControl.git`
 
 Danach können JVC Projektor Instanzen erstellt werden.
 
@@ -75,7 +75,7 @@ Name          | Typ                         | Beschreibung                      
 ------------- | --------------------------- | --------------------------------------- | ------------------------ | ----------------------------------
 Model         | String                      | Projektormodell                         |                          | Wird einmalig nach Ändern der Modulkonfiguration gelesen
 Power         | Boolean                     | Variable zum Schalten der Projektor     |                          | Die Variable "Power" dient zum einfachen ein- und ausschalten über das UI. Der Zustand ist true, wenn der PowerStatus "Powered On" ist, ansonsten ist sie false.
-PowerStatus   | JvcProjector.PowerStatus    | Power Status                            |                          | 
+PowerStatus   | JvcProjector.PowerStatus    | Power Status                            |                          |
 MACAddress    | string                      | MAC Adresse                             |                          |
 CurrentInput  | JvcProjector.Input          | Aktueller Eingang                       | PowerStatus == PoweredOn |
 SourceStatus  | JvcProjector.SourceStatus   | Status der Quelle                       | PowerStatus == PoweredOn |
@@ -126,7 +126,7 @@ Wert | Bezeichnung          | Anmerkung
 Soweit nicht anders angegeben, liefern die Funktionen keinen Rückgabewert.
 
 ```php
-JvcProjector_GetProjectorStatus(integer $InstanzID);
+JvcProjector_UpdateProjectorStatus(integer $InstanzID);
 ```
 Liest den Status des Projektors mit der InstanzID $InstanzID und setzt alle Symcon Variablen.
 

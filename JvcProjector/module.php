@@ -355,10 +355,10 @@ class JvcProjector extends BaseIPSModule
         }
     }
 
-    private function UpdateVariables(JvcProjectorConnection $jvcProjectorConnection, bool $initialRun = false)
+    private function UpdateVariables(JvcProjectorConnection $jvcProjectorConnection)
     {
         // Only read beamer model on initial run
-        if ($initialRun)
+        if ($this->initialRun)
         {
             $this->SendDebug(__FUNCTION__, "Get Projector Model and MAC address", 0);
 
@@ -381,6 +381,8 @@ class JvcProjector extends BaseIPSModule
                 $this->LogMessage("Fehler beim Ermitteln von MAC Adresse: " . $e->getMessage(), KL_ERROR);
                 $this->UpdateStringValueIfChanged(self::VARIABLE_MACAddress, $this->Translate("Unknown"));
             }
+
+            $this->initialRun = false;
         }
 
         try
@@ -503,5 +505,3 @@ class JvcProjector extends BaseIPSModule
         return $powerStatus;
     }
 }
-
-?>
